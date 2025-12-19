@@ -62,8 +62,10 @@ mvn clean compile
 This runs the full scenario automatically:
 
 ```bash
-mvn exec:java -Dexec.mainClass="io.aeron.bug.AutomatedBugReproducer"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.AutomatedBugReproducer"
 ```
+
+> **Note:** We use `exec:exec` instead of `exec:java` because Aeron/Agrona requires `--add-opens` JVM arguments to access internal JDK APIs on Java 9+. These are configured in `pom.xml`.
 
 Expected output:
 
@@ -130,22 +132,22 @@ FIX:
 
 **Terminal 1 - Node 0:**
 ```bash
-mvn exec:java -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="0"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="0"
 ```
 
 **Terminal 2 - Node 1:**
 ```bash
-mvn exec:java -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="1"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="1"
 ```
 
 **Terminal 3 - Node 2:**
 ```bash
-mvn exec:java -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="2"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="2"
 ```
 
 **Terminal 4 - Client:**
 ```bash
-mvn exec:java -Dexec.mainClass="io.aeron.bug.TestClient"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.TestClient"
 ```
 
 Then:
