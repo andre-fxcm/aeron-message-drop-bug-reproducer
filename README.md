@@ -132,17 +132,17 @@ FIX:
 
 **Terminal 1 - Node 0:**
 ```bash
-mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="0"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dnode.id=0
 ```
 
 **Terminal 2 - Node 1:**
 ```bash
-mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="1"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dnode.id=1
 ```
 
 **Terminal 3 - Node 2:**
 ```bash
-mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dexec.args="2"
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.ServiceMessageDropReproducer" -Dnode.id=2
 ```
 
 **Terminal 4 - Client:**

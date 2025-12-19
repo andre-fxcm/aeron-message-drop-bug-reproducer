@@ -66,6 +66,7 @@
                         <argument>-classpath</argument>
                         <classpath/>
                         <argument>${exec.mainClass}</argument>
+                        <argument>${node.id}</argument>
                     </arguments>
                 </configuration>
             </plugin>
