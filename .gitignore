@@ -1,0 +1,126 @@
+# Maven
+target/
+backupe
+pom.xml.tag
+
+# Root-level backup directory only
+/backup/
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Binary artifacts - use Maven dependency management instead
+*.jar
+*.war
+*.ear
+app/
+demo/docker/libs/
+build/
+
+# Generated sources (FlatBuffers)
+**/generated-sources/
+**/generated-test-sources/
+
+# SBE Generated codecs (currently in src/main/java)
+tradu-common/src/main/java/com/tradu/common/cluster/codecs/
+tradu-websocket-gateway/com/
+
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+#Serena MCP
+.serena/
+
+#Claude
+.claude
+
+# Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# VS Code
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Application data
+data/
+*.db
+*.log
+
+# Docker volumes
+monitoring/grafana/data/
+monitoring/prometheus/data/
+
+tree/
+
+# Reference materials
+references/
+
+# Environment and secrets files
+.env
+.env.local
+.env.*.local
+secrets.env
+*.secrets
+
+# LP Authentication configs with real credentials
+lp-authentication-config.yaml
+!lp-authentication-config.yaml.template
+!lp-authentication-config.yaml.example
+
+# Temporary secret files
+*.pem
+*.key
+*.cert
+*.p12
+*.jks
+
+# Aeron cluster runtime directories
+aeron-cluster/
+aeron-cluster-*/
+/dev/shm/aeron-cluster*
+/tmp/aeron-archive*
+
+# Aeron rest api runtime directories
+aeron-rest-api/
+aeron-rest-api-*/
+
+# Aeron gateway runtime directories
+aeron-gateway/
+aeron-gateway-*/
+
+
+# Aeron websocket gateway
+aeron-websocket/
+aeron-websocket-*/
+
+# Backup agent runtime directories and archives
+**/backup/archive/
+**/backup/cluster/
+cluster_backup*.tgz
+cluster_backup*.tgz.sha256
+*.tgz.sha256
+
+.gemini/
+gha-creds-*.json
+
+# Aeron samples repository (reference only)
+aeron-io-samples/
+logs/
