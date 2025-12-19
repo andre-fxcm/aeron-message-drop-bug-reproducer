@@ -128,6 +128,77 @@ FIX:
     nextServiceSessionId = clusterSessionId + 1;
 ```
 
+### Eventual Recovery Test
+
+This test demonstrates that messages eventually start going through after enough attempts. It sends 10 PINGs while healthy (all succeed), then kills the leader and keeps sending PINGs until one finally gets through:
+
+```bash
+mvn exec:exec -Dexec.mainClass="io.aeron.bug.EventualRecoveryTest"
+```
+
+Expected output:
+
+```
+================================================================================
+AERON CLUSTER BUG - EVENTUAL RECOVERY TEST
+Demonstrates that messages eventually go through after enough attempts
+================================================================================
+
+STEP 1: Starting 3-node cluster...
+  Node 0 started
+  Node 1 started
+  Node 2 started
+Initial leader: Node 1
+
+STEP 2: Sending 10 PINGs before failover (baseline)...
+  PING #1 -> PONG RECEIVED ✓
+  PING #2 -> PONG RECEIVED ✓
+  PING #3 -> PONG RECEIVED ✓
+  PING #4 -> PONG RECEIVED ✓
+  PING #5 -> PONG RECEIVED ✓
+  PING #6 -> PONG RECEIVED ✓
+  PING #7 -> PONG RECEIVED ✓
+  PING #8 -> PONG RECEIVED ✓
+  PING #9 -> PONG RECEIVED ✓
+  PING #10 -> PONG RECEIVED ✓
+
+  Before failover: 10/10 PONGs received
+  All messages going through - cluster is healthy!
+
+STEP 3: Killing leader (Node 1)...
+STEP 4: Waiting for new leader election...
+New leader elected: Node 0
+
+STEP 5: Sending PINGs until a PONG is received...
+
+  PING #1 -> PONG DROPPED (waiting...)
+  PING #2 -> PONG DROPPED (waiting...)
+  PING #3 -> PONG DROPPED (waiting...)
+  ...
+  PING #10 -> PONG DROPPED (waiting...)
+  PING #20 -> PONG DROPPED (waiting...)
+  ...
+  PING #42 -> PONG RECEIVED! ✓
+
+  *** First successful PONG after 41 dropped messages ***
+
+================================================================================
+RESULTS:
+================================================================================
+*** BUG CONFIRMED WITH EVENTUAL RECOVERY ***
+
+  PINGs sent to get a response: 42
+  Messages dropped: 41 (PINGs #1 through #41)
+
+EXPLANATION:
+  After failover, nextServiceSessionId < logServiceSessionId.
+  Each cluster.offer() increments nextServiceSessionId by 1.
+  After 42 attempts, nextServiceSessionId finally exceeds
+  logServiceSessionId, and messages start going through again.
+```
+
+This proves the bug creates a **"silent drop window"** where an unpredictable number of messages are lost after each failover.
+
 ### Manual Testing (Alternative)
 
 **Terminal 1 - Node 0:**
@@ -165,7 +236,7 @@ Then:
 
 ## Affected Versions
 
-Tested with Aeron 1.46.x, but the bug has likely existed for many versions.
+Tested with Aeron 1.49.3, but the bug has likely existed for many versions.
 
 ## Files
 
