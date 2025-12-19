@@ -152,15 +152,18 @@ Initial leader: Node 1
 
 STEP 2: Sending 10 PINGs before failover (baseline)...
   PING #1 -> PONG RECEIVED ✓
+    [Node 1, role=LEADER] received PONG #1
+    [Node 2, role=FOLLOWER] received PONG #1
+    [Node 0, role=FOLLOWER] received PONG #1
   PING #2 -> PONG RECEIVED ✓
-  PING #3 -> PONG RECEIVED ✓
-  PING #4 -> PONG RECEIVED ✓
-  PING #5 -> PONG RECEIVED ✓
-  PING #6 -> PONG RECEIVED ✓
-  PING #7 -> PONG RECEIVED ✓
-  PING #8 -> PONG RECEIVED ✓
-  PING #9 -> PONG RECEIVED ✓
+    [Node 1, role=LEADER] received PONG #2
+    [Node 0, role=FOLLOWER] received PONG #2
+    [Node 2, role=FOLLOWER] received PONG #2
+  ...
   PING #10 -> PONG RECEIVED ✓
+    [Node 1, role=LEADER] received PONG #10
+    [Node 0, role=FOLLOWER] received PONG #10
+    [Node 2, role=FOLLOWER] received PONG #10
 
   Before failover: 10/10 PONGs received
   All messages going through - cluster is healthy!
@@ -179,6 +182,8 @@ STEP 5: Sending PINGs until a PONG is received...
   PING #20 -> PONG DROPPED (waiting...)
   ...
   PING #42 -> PONG RECEIVED! ✓
+    [Node 0, role=LEADER] received PONG #42
+    [Node 2, role=FOLLOWER] received PONG #42
 
   *** First successful PONG after 41 dropped messages ***
 

@@ -34,6 +34,8 @@ import org.agrona.concurrent.IdleStrategy;
 
 import java.io.File;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,10 +50,13 @@ public class EventualRecoveryTest {
     private static final int PORT_BASE = 21000;
     private static final int MAX_PINGS_TO_SEND = 100;
 
-    // Track which PONGs were received by followers
-    private static final CopyOnWriteArrayList<Integer> pongsReceivedByFollowers = new CopyOnWriteArrayList<>();
-    private static final CopyOnWriteArrayList<Integer> pongsPublishedByLeader = new CopyOnWriteArrayList<>();
+    // Track which PONGs were received by followers (use Set to avoid counting duplicates from multiple followers)
+    private static final Set<Integer> pongsReceivedByFollowers = new ConcurrentSkipListSet<>();
+    private static final Set<Integer> pongsPublishedByLeader = new ConcurrentSkipListSet<>();
     private static final AtomicInteger currentLeader = new AtomicInteger(-1);
+
+    // Buffer for node PONG reception messages (to print after PING status)
+    private static final CopyOnWriteArrayList<String> pongReceptionBuffer = new CopyOnWriteArrayList<>();
 
     // Cluster nodes
     private static final ClusteredMediaDriver[] drivers = new ClusteredMediaDriver[NODE_COUNT];
@@ -83,12 +88,14 @@ public class EventualRecoveryTest {
                 pongsPublishedByLeader.clear();
 
                 for (int i = 1; i <= 10; i++) {
+                    pongReceptionBuffer.clear();
                     client.sendPing(i);
                     Thread.sleep(100);
                     client.poll();
 
                     boolean received = pongsReceivedByFollowers.contains(i);
                     System.out.printf("  PING #%d -> %s%n", i, received ? "PONG RECEIVED ✓" : "PONG DROPPED ✗");
+                    flushPongBuffer();
                 }
 
                 Thread.sleep(500);
@@ -128,6 +135,7 @@ public class EventualRecoveryTest {
 
                 while (pingNum < MAX_PINGS_TO_SEND) {
                     pingNum++;
+                    pongReceptionBuffer.clear();
                     client.sendPing(pingNum);
 
                     // Brief pause and poll for responses
@@ -136,7 +144,9 @@ public class EventualRecoveryTest {
 
                     // Check if this PONG was received
                     if (pongsReceivedByFollowers.contains(pingNum)) {
+                        Thread.sleep(50); // Allow all nodes to add to buffer
                         System.out.printf("  PING #%d -> PONG RECEIVED! ✓%n", pingNum);
+                        flushPongBuffer();
                         System.out.printf("%n  *** First successful PONG after %d dropped messages ***%n", droppedCount);
                         break;
                     } else {
@@ -279,6 +289,13 @@ public class EventualRecoveryTest {
         }
     }
 
+    private static void flushPongBuffer() {
+        for (String msg : pongReceptionBuffer) {
+            System.out.println(msg);
+        }
+        pongReceptionBuffer.clear();
+    }
+
     // ==================== Test Service ====================
 
     static class TestService implements ClusteredService {
@@ -327,7 +344,11 @@ public class EventualRecoveryTest {
             } else if (templateId == MSG_PONG) {
                 int pingNumber = buffer.getInt(offset + 4);
 
-                // Count PONGs received by followers
+                // Buffer the message to print after PING status
+                pongReceptionBuffer.add(String.format("    [Node %d, role=%s] received PONG #%d",
+                        nodeId, cluster.role(), pingNumber));
+
+                // Count PONGs received by followers (used for bug detection)
                 if (cluster.role() != Cluster.Role.LEADER) {
                     pongsReceivedByFollowers.add(pingNumber);
                 }
